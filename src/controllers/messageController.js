@@ -1,3 +1,4 @@
+const redisClient = require('../dbStrategy/redisClient');
 const Message = require('../models/Message');
 
 // Criar uma nova mensagem
@@ -20,12 +21,17 @@ const createMessage = async (req, res) => {
     });
 
     await newMessage.save();
+
+    // Publique a mensagem no canal Redis
+    await redisClient.publish(`messages:${recipient}`, JSON.stringify(newMessage));
+
     res.status(201).json(newMessage);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erro ao salvar mensagem' });
   }
 };
+
 
 // Obter mensagens para um usuário ou grupo
 const getMessages = async (req, res) => {

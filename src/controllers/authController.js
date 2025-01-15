@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const User = require('../models/User'); // Modelo do usuário
 const Session = require('../models/Session');
+const redisClient = require('../dbStrategy/redisClient');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -56,16 +57,18 @@ const login = async (req, res) => {
     // Gerar token JWT
     const token = jwt.sign({ id: user._id, email: user.email, username: user.name }, JWT_SECRET, { expiresIn: '1h' });
 
-    // Salvar a sessão no banco de dados
-    const session = new Session({ username: user.email });
-    await session.save();
+    // Salvar a sessão no Redis
+    await redisClient.set(`session:${user._id}`, JSON.stringify({ token, loginTime: Date.now() }), {
+      EX: 3600, // Define um tempo de expiração de 1 hora
+    });
 
-    res.status(200).json({ token, name: user.name, session });
+    res.status(200).json({ token, name: user.name });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erro ao realizar login' });
   }
 };
+
 
 module.exports = {
   register,
