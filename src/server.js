@@ -1,8 +1,10 @@
 const express = require("express");
 const cors = require("cors"); // Importa o CORS
-const connectDB = require("./database");
-const messageRoutes = require("./routes/messages");
+require('dotenv').config();
+const connectDB = require("./dbStrategy/database"); // Importa a função de conexão com o MongoDB
+const messageRoutes = require("./routes/messages"); // Importa as rotas de mensagens 
 const authRoutes = require("./routes/auth");
+const groupRoutes = require("./routes/group");
 
 const app = express();
 
@@ -24,6 +26,7 @@ connectDB();
 // Usar as rotas de mensagens
 app.use("/api", messageRoutes);
 app.use("/api/auth", authRoutes);
+app.use('/api/groups', groupRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
