@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const http = require("http"); // Para criar um servidor HTTP
+const http = require("http");
 const { Server } = require("socket.io");
 require("dotenv").config();
 const { connectDB, connectRedis } = require("./dbStrategy/database");
@@ -9,7 +9,7 @@ const authRoutes = require("./routes/auth");
 const groupRoutes = require("./routes/group");
 
 const app = express();
-const server = http.createServer(app); // Cria um servidor HTTP
+const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173", // URL do frontend
@@ -27,6 +27,18 @@ app.use(express.json());
   const redisClient = await connectRedis();
   app.set("redisClient", redisClient);
 
+  // Redis Pub/Sub para sincronizar eventos entre réplicas
+  const redisSubscriber = redisClient.duplicate();
+  await redisSubscriber.connect();
+
+  // Subscribing to channels
+  redisSubscriber.subscribe("messages:*", (message, channel) => {
+    console.log(`Mensagem recebida no canal ${channel}:`, message);
+
+    const [_, roomId] = channel.split(":");
+    io.to(roomId).emit("receive-message", JSON.parse(message));
+  });
+
   // WebSocket logic
   io.on("connection", (socket) => {
     console.log(`Novo cliente conectado: ${socket.id}`);
@@ -38,10 +50,16 @@ app.use(express.json());
     });
 
     // Enviar mensagem para uma sala
-    socket.on("send-message", (data) => {
+    socket.on("send-message", async (data) => {
       const { roomId, message, sender } = data;
-      console.log(`Mensagem recebida: ${message} para sala: ${roomId}`);
-      io.to(roomId).emit("receive-message", { message, sender }); // Envia a mensagem para a sala
+
+      // Publicar a mensagem no Redis para sincronização entre réplicas
+      await redisClient.publish(
+        `messages:${roomId}`,
+        JSON.stringify({ sender, message })
+      );
+
+      console.log(`Mensagem publicada no canal messages:${roomId}`);
     });
 
     socket.on("disconnect", () => {
@@ -53,6 +71,9 @@ app.use(express.json());
   app.use("/api", messageRoutes);
   app.use("/api/auth", authRoutes);
   app.use("/api/groups", groupRoutes);
+
+  // Teste de endpoint
+  app.get("/", (req, res) => res.send("API funcionando!"));
 
   // Iniciar o servidor
   const PORT = process.env.PORT || 3000;

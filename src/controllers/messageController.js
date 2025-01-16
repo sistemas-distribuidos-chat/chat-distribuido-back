@@ -1,7 +1,37 @@
 const redisClient = require('../dbStrategy/redisClient');
 const Message = require('../models/Message');
 
-// Criar uma nova mensagem
+// // Criar uma nova mensagem
+// const createMessage = async (req, res) => {
+//   try {
+//     const { sender, recipient, isGroup, message } = req.body;
+
+//     if (isGroup) {
+//       const group = await Group.findById(recipient);
+//       if (!group) {
+//         return res.status(404).json({ error: 'Grupo não encontrado' });
+//       }
+//     }
+
+//     const newMessage = new Message({
+//       sender,
+//       recipient,
+//       isGroup,
+//       message,
+//     });
+
+//     await newMessage.save();
+
+//     // Publique a mensagem no canal Redis
+//     await redisClient.publish(`messages:${recipient}`, JSON.stringify(newMessage));
+
+//     res.status(201).json(newMessage);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: 'Erro ao salvar mensagem' });
+//   }
+// };
+
 const createMessage = async (req, res) => {
   try {
     const { sender, recipient, isGroup, message } = req.body;

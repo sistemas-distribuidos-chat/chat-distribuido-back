@@ -52,7 +52,33 @@ const addMembersToGroup = async (req, res) => {
   }
 };
 
-// Obter todos os grupos de um usuário
+// // Obter todos os grupos de um usuário
+// const getGroups = async (req, res) => {
+//   try {
+//     const { userId } = req.query;
+//     if (!userId) {
+//       return res.status(400).json({ error: 'O parâmetro userId é necessário' });
+//     }
+
+//     // Verifique o cache no Redis
+//     const cachedGroups = await redisClient.get(`groups:${userId}`);
+//     if (cachedGroups) {
+//       return res.status(200).json(JSON.parse(cachedGroups));
+//     }
+
+//     // Se não estiver no cache, busque no banco
+//     const groups = await Group.find({ members: userId }).populate('members', 'name email');
+
+//     // Armazene o resultado no cache
+//     await redisClient.set(`groups:${userId}`, JSON.stringify(groups), { EX: 3600 });
+
+//     res.status(200).json(groups);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: 'Erro ao buscar grupos' });
+//   }
+// };
+
 const getGroups = async (req, res) => {
   try {
     const { userId } = req.query;
@@ -78,6 +104,7 @@ const getGroups = async (req, res) => {
     res.status(500).json({ error: 'Erro ao buscar grupos' });
   }
 };
+
 
 module.exports = {
   createGroup,
