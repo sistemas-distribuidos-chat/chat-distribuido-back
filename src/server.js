@@ -68,7 +68,7 @@ app.use(express.json());
   });
 
   // Usar as rotas
-  app.use("/api", messageRoutes);
+  app.use("/api/message", messageRoutes);
   app.use("/api/auth", authRoutes);
   app.use("/api/groups", groupRoutes);
 

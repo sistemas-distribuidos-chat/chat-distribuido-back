@@ -4,10 +4,10 @@ const { createMessage, getMessages } = require('../controllers/messageController
 const router = express.Router();
 
 // Criar uma nova mensagem
-router.post('/messages', createMessage);
+router.post('/create', createMessage);
 
 // Obter mensagens para um destinatário
-router.get('/messages', getMessages);
+router.get('/list', getMessages);
 
 // // Criar uma nova mensagem
 // router.post('/messages', async (req, res) => {

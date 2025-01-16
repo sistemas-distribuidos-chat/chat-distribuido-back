@@ -1,4 +1,5 @@
 const redisClient = require('../dbStrategy/redisClient');
+const Group = require('../models/Group');
 const Message = require('../models/Message');
 
 // // Criar uma nova mensagem
@@ -32,6 +33,7 @@ const Message = require('../models/Message');
 //   }
 // };
 
+// Criar uma nova mensagem
 const createMessage = async (req, res) => {
   try {
     const { sender, recipient, isGroup, message } = req.body;
@@ -51,10 +53,6 @@ const createMessage = async (req, res) => {
     });
 
     await newMessage.save();
-
-    // Publique a mensagem no canal Redis
-    await redisClient.publish(`messages:${recipient}`, JSON.stringify(newMessage));
-
     res.status(201).json(newMessage);
   } catch (err) {
     console.error(err);
