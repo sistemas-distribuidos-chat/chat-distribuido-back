@@ -1,6 +1,6 @@
 const express = require('express');
 const Message = require('../models/Message'); // Modelo para mensagens
-const { createMessage, getMessages } = require('../controllers/messageController');
+const { createMessage, getMessages, getContacts, getMessagesWithContact } = require('../controllers/messageController');
 const router = express.Router();
 
 // Criar uma nova mensagem
@@ -8,6 +8,11 @@ router.post('/create', createMessage);
 
 // Obter mensagens para um destinatário
 router.get('/list', getMessages);
+
+router.get('/conversation', getMessagesWithContact);
+
+// Obter contatos do usuário
+router.get('/contacts', getContacts);
 
 // // Criar uma nova mensagem
 // router.post('/messages', async (req, res) => {

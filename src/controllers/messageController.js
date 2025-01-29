@@ -99,9 +99,69 @@ const deleteMessageById = async (req, res) => {
   }
 };
 
+// Obter contatos de um usuário com base nas mensagens enviadas/recebidas
+const getContacts = async (req, res) => {
+  try {
+    const { userId } = req.query; // ID do usuário logado
+    if (!userId) {
+      return res.status(400).json({ error: 'O parâmetro userId é obrigatório' });
+    }
+
+    // Buscar mensagens enviadas ou recebidas pelo usuário
+    const messages = await Message.find({
+      $or: [{ sender: userId }, { recipient: userId }],
+    }).populate('sender', 'name email').populate('recipient', 'name email');
+
+    // Extrair os IDs dos contatos únicos
+    const contacts = new Set();
+    messages.forEach((msg) => {
+      if (msg.sender._id.toString() !== userId) {
+        contacts.add(msg.sender);
+      }
+      if (msg.recipient.toString() !== userId) {
+        contacts.add(msg.recipient);
+      }
+    });
+
+    res.status(200).json(Array.from(contacts)); // Retorna os contatos como uma lista
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar contatos' });
+  }
+};
+
+// Listar mensagens entre o usuário e um contato específico
+const getMessagesWithContact = async (req, res) => {
+  try {
+    const { userId, contactId } = req.query; // IDs do usuário logado e do contato
+
+    if (!userId || !contactId) {
+      return res.status(400).json({ error: 'Os parâmetros userId e contactId são obrigatórios' });
+    }
+
+    // Buscar mensagens trocadas entre o usuário e o contato
+    const messages = await Message.find({
+      $or: [
+        { sender: userId, recipient: contactId },
+        { sender: contactId, recipient: userId },
+      ],
+    })
+      .sort({ timestamp: 1 }) // Ordenar por data (do mais antigo ao mais recente)
+      .populate('sender', 'name email') // Popula os dados do remetente
+      .populate('recipient', 'name email'); // Popula os dados do destinatário
+
+    res.status(200).json({ messages });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar mensagens' });
+  }
+};
+
 module.exports = {
   createMessage,
   getMessages,
   updateMessageById,
   deleteMessageById,
+  getContacts,
+  getMessagesWithContact,
 };

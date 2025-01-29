@@ -7,6 +7,7 @@ const { connectDB, connectRedis } = require("./dbStrategy/database");
 const messageRoutes = require("./routes/messages");
 const authRoutes = require("./routes/auth");
 const groupRoutes = require("./routes/group");
+const contactRoutes = require("./routes/contact");
 
 const app = express();
 const server = http.createServer(app);
@@ -71,6 +72,7 @@ app.use(express.json());
   app.use("/api/message", messageRoutes);
   app.use("/api/auth", authRoutes);
   app.use("/api/groups", groupRoutes);
+  app.use('/api/contacts', contactRoutes);
 
   // Teste de endpoint
   app.get("/", (req, res) => res.send("API funcionando!"));
