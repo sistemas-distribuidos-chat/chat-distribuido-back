@@ -157,6 +157,28 @@ const getMessagesWithContact = async (req, res) => {
   }
 };
 
+// Obter todas as mensagens de um grupo específico
+const getGroupMessages = async (req, res) => {
+  try {
+    const { groupId } = req.query;
+
+    if (!groupId) {
+      return res.status(400).json({ error: 'O parâmetro groupId é obrigatório' });
+    }
+
+    // Buscar mensagens do grupo ordenadas por data (mais recentes primeiro)
+    const messages = await Message.find({ recipient: groupId, isGroup: true })
+      .populate('sender', 'name email')
+      .sort({ timestamp: -1 });
+
+    res.status(200).json({messages});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar mensagens do grupo' });
+  }
+};
+
+
 module.exports = {
   createMessage,
   getMessages,
@@ -164,4 +186,5 @@ module.exports = {
   deleteMessageById,
   getContacts,
   getMessagesWithContact,
+  getGroupMessages
 };

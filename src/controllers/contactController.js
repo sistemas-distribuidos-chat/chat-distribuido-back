@@ -1,3 +1,4 @@
+const Group = require("../models/Group");
 const User = require("../models/User");
 
 // Enviar solicitação de contato
@@ -155,11 +156,41 @@ const declineContactRequest = async (req, res) => {
   }
 };
 
+// Obter contatos confirmados e grupos do usuário
+const getConfirmedContactsAndGroups = async (req, res) => {
+  try {
+    const { userId } = req.query; // ID do usuário logado
+
+    if (!userId) {
+      return res.status(400).json({ error: 'O parâmetro userId é obrigatório' });
+    }
+
+    // Buscar o usuário e seus contatos confirmados
+    const user = await User.findById(userId)
+      .populate('contacts', 'name email')
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    // Buscar os grupos nos quais o usuário está como membro
+    const groups = await Group.find({ members: userId }).select('name');
+
+    // Retornar os contatos confirmados e os grupos
+    res.status(200).json({ contacts: user.contacts, groups });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar contatos e grupos' });
+  }
+};
+
 
 module.exports = {
   sendContactRequest,
   acceptContactRequest,
   getContactRequests,
   getConfirmedContacts,
-  declineContactRequest
+  declineContactRequest,
+  getConfirmedContactsAndGroups,
 };

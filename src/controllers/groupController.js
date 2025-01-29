@@ -105,9 +105,33 @@ const getGroups = async (req, res) => {
   }
 };
 
+// Obter membros de um grupo específico
+const getGroupMembers = async (req, res) => {
+  try {
+    const { groupId } = req.query;
+
+    if (!groupId) {
+      return res.status(400).json({ error: 'O parâmetro groupId é obrigatório' });
+    }
+
+    // Buscar o grupo pelo ID e popular os membros com nome e email
+    const group = await Group.findById(groupId).populate('members', 'name email');
+
+    if (!group) {
+      return res.status(404).json({ error: 'Grupo não encontrado' });
+    }
+
+    res.status(200).json({ members: group.members });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar membros do grupo' });
+  }
+};
+
 
 module.exports = {
   createGroup,
   getGroups,
   addMembersToGroup,
+  getGroupMembers,
 };

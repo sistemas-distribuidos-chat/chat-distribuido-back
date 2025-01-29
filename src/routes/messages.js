@@ -1,6 +1,6 @@
 const express = require('express');
 const Message = require('../models/Message'); // Modelo para mensagens
-const { createMessage, getMessages, getContacts, getMessagesWithContact } = require('../controllers/messageController');
+const { createMessage, getMessages, getContacts, getMessagesWithContact, getGroupMessages } = require('../controllers/messageController');
 const router = express.Router();
 
 // Criar uma nova mensagem
@@ -13,6 +13,9 @@ router.get('/conversation', getMessagesWithContact);
 
 // Obter contatos do usuário
 router.get('/contacts', getContacts);
+
+// Rota para obter mensagens de um grupo específico
+router.get('/group-messages', getGroupMessages);
 
 // // Criar uma nova mensagem
 // router.post('/messages', async (req, res) => {

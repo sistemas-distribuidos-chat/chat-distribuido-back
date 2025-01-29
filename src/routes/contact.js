@@ -1,5 +1,5 @@
 const express = require('express');
-const { sendContactRequest, acceptContactRequest, getContactRequests, getConfirmedContacts, declineContactRequest } = require('../controllers/contactController');
+const { sendContactRequest, acceptContactRequest, getContactRequests, getConfirmedContacts, declineContactRequest, getConfirmedContactsAndGroups } = require('../controllers/contactController');
 const router = express.Router();
 
 // Enviar solicitação de contato
@@ -15,6 +15,9 @@ router.post('/decline', declineContactRequest);
 router.get('/requests', getContactRequests);
 
 // Rota para obter contatos confirmados
-router.get('/', getConfirmedContacts);
+router.get('/contacts', getConfirmedContacts);
+
+// Rota para obter contatos confirmados e grupos
+router.get('/', getConfirmedContactsAndGroups);
 
 module.exports = router;
